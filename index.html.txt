@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Now - Tienda de Juguetes</title>
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4D96FF;
+            --success: #6BCB77;
+            --warning: #FFD93D;
+            --background: #F9F9F9;
+            --text: #2C3E50;
+            --card-bg: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .window {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            position: relative;
+            display: none;
+            border: 4px solid var(--secondary);
+        }
+
+        .window.active {
+            display: block;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            cursor: pointer;
+            transition: transform 0.2s;
+            z-index: 10;
+        }
+        .close-btn:hover {
+            transform: scale(1.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px var(--warning);
+        }
+
+        h2, h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+
+        .profile-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .profile-card {
+            background: #FFF0F5;
+            border: 3px dashed var(--secondary);
+            border-radius: 15px;
+            padding: 20px;
+            width: 100%;
+            max-width: 180px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-5px);
+            background: var(--warning);
+        }
+
+        .profile-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .client-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .client-grid {
+                grid-template-columns: 2fr 1fr;
+            }
+            h1 { font-size: 2.5rem; }
+            body { padding: 20px; }
+            .window { padding: 30px; }
+        }
+
+        .products-section {
+            background: #E8F4F8;
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            max-height: 460px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .toy-card {
+            background: white;
+            border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+            border: 2px solid var(--warning);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .toy-img-container {
+            width: 100%;
+            height: 75px;
+            background-color: #F0F4F8;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+        }
+
+        .toy-name {
+            font-size: 0.75rem;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .reviews-box, .contact-box, .order-box {
+            background: #FFF;
+            border: 2px solid var(--secondary);
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        .comments-list {
+            margin-top: 10px;
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+        .comment-item {
+            background: #F1F1F1;
+            padding: 5px 8px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            border-left: 3px solid var(--secondary);
+            word-break: break-word;
+        }
+
+        .contact-box {
+            cursor: pointer;
+            background: var(--warning);
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #DDD;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .btn-success { background-color: var(--success); }
+        .btn-danger { background-color: var(--primary); }
+        .btn-primary { background-color: var(--secondary); }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            min-width: 500px;
+        }
+
+        th, td {
+            border: 2px solid #E0E0E0;
+            padding: 8px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        th {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .stock-alert {
+            background: #FFD2D2;
+            color: #D8000C;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            border: 1px solid #D8000C;
+        }
+    </style>
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init("QTakXSLcrfKfC00VN");
+        })();
+    </script>
+</head>
+<body>
+
+    <div id="view-home" class="window active">
+        <h1>Play Now</h1>
+        <h3>Selecciona tu perfil...</h3>
+        <div class="profile-container">
+            <div class="profile-card" onclick="navigateTo('view-client')">
+                <div class="profile-icon">👶</div>
+                <strong>Cliente</strong>
+            </div>
+            <div class="profile-card" onclick="navigateTo('view-admin-login')">
+                <div class="profile-icon">⚙️</div>
+                <strong>Administrador</strong>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-client" class="window">
+        <span class="close-btn" onclick="navigateTo('view-home')">X</span>
+        <h1>Bienvenido a Play Now</h1>
+        
+        <div class="client-grid">
+            <div>
+                <div class="products-section">
+                    <h3 style="text-align: left; font-size: 1.1rem;">Productos Disponibles</h3>
+                    <div class="products-grid" id="client-products-grid"></div>
+                </div>
+                
+                <div class="contact-box" onclick="toggleContactInfo()" style="margin-top: 20px;">
+                    📞 Ayuda y Contacto (Clic aquí)
+                    <div id="contact-details" style="display:none; margin-top:10px; font-weight:normal; text-align:left;">
+                        <p><strong>Número:</strong> 800-122-2222</p>
+                        <p><strong>Correo:</strong> playnow2026@gmail.com</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-panel">
+                <div class="reviews-box">
+                    <label><strong>Dejar Reseñas y Comentarios:</strong></label>
+                    <textarea id="client-comment-text" placeholder="Escribe aquí tu opinión..." rows="2" style="resize:none;"></textarea>
+                    <div class="btn-container" style="margin-top: 8px;">
+                        <button class="btn btn-success" style="padding: 6px; font-size: 0.8rem;" onclick="submitComment()">Publicar</button>
+                        <button class="btn btn-danger" style="padding: 6px; font-size: 0.8rem;" onclick="cancelComment()">Cancelar</button>
+                    </div>
+                    <div class="comments-list" id="comments-display-container"></div>
+                </div>
+
+                <div class="order-box">
+                    <h3>Orden de Compra</h3>
+                    <form id="order-form" onsubmit="event.preventDefault();">
+                        <div class="form-group">
+                            <label>Producto:</label>
+                            <select id="order-product" onchange="updateFinalPrice()"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantidad:</label>
+                            <input type="number" id="order-qty" value="1" min="1" onchange="updateFinalPrice()">
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre Completo:</label>
+                            <input type="text" id="order-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección de Entrega:</label>
+                            <input type="text" id="order-address" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Correo Electrónico:</label>
+                            <input type="email" id="order-email" required placeholder="tu-correo@ejemplo.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha y Hora de Entrega:</label>
+                            <input type="text" id="order-datetime" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Precio Final:</label>
+                            <input type="text" id="order-total" readonly>
+                        </div>
+                        <div class="form-group">
+                            <p style="font-size:0.85rem; color: var(--primary); font-weight:bold;">* El pago es a contraentrega</p>
+                        </div>
+                        <div class="btn-container">
+                            <button type="button" class="btn btn-success" onclick="processOrder(true)">Aceptar</button>
+                            <button type="button" class="btn btn-danger" onclick="processOrder(false)">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-admin-login" class="window">
+        <span class="close-btn" onclick="navigateTo('view-home')">X</span>
+        <h1>Ventana de Administrador</h1>
+        <h2>Inicia Sesión</h2>
+        <div style="max-width: 400px; margin: 0 auto;">
+            <div class="form-group">
+                <label>Correo de Administrador:</label>
+                <input type="email" id="admin-user-email" placeholder="Introduce el correo corporativo">
+            </div>
+            <div class="form-group">
+                <label>Contraseña:</label>
+                <input type="password" id="admin-pass" placeholder="Contraseña">
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="loginAdmin()">Ingresar</button>
+        </div>
+    </div>
+
+    <div id="view-admin-panel" class="window">
+        <span class="close-btn" onclick="navigateTo('view-home')">X</span>
+        <h1>Bienvenido Administrador</h1>
+        <div class="btn-container" style="margin-bottom: 20px; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="openAdminSubView('admin-inventory')">Inventario</button>
+            <button class="btn btn-primary" onclick="openAdminSubView('admin-orders')">Órdenes</button>
+            <button class="btn btn-primary" onclick="openAdminSubView('admin-stock')">Stock Bajo</button>
+        </div>
+
+        <div id="admin-inventory" class="admin-subview" style="display:none;">
+            <h3>Inventario de Productos</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio Tienda ($)</th>
+                            <th>Precio Público (+20%)</th>
+                            <th>Existencia</th>
+                            <th>Stock Editable</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="admin-orders" class="admin-subview" style="display:none;">
+            <h3>Órdenes de Compra Recibidas</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Producto</th>
+                            <th>Cant.</th>
+                            <th>Total</th>
+                            <th>Dirección</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="admin-stock" class="admin-subview" style="display:none;">
+            <h3>Control de Stock Bajo</h3>
+            <div id="stock-alerts-container"></div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Elementos Existentes (Stock)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const EMAILJS_SERVICE_id = "service_8mwt90h";
+        const EMAILJS_TEMPLATE_CLIENTE = "template_alwpsvp"; 
+        const EMAILJS_TEMPLATE_ADMIN = "TU_TEMPLATE_ADMIN"; 
+        const EMAILJS_TEMPLATE_ENTREGA = "TU_TEMPLATE_ENTREGA"; 
+
+        const datosProductosOriginales = [
+            { nombre: "Oso de Peluche", precio: 120, icono: "🧸" },
+            { nombre: "Carro a Escala", precio: 85, icono: "🚗" },
+            { nombre: "Muñeca Clásica", precio: 150, icono: "👧" },       
+            { nombre: "Labubu Art Toy", precio: 320, icono: "🐰" },       
+            { nombre: "Patineta Mini", precio: 180, icono: "🛹" },
+            { nombre: "Dinosaurio T-Rex", precio: 110, icono: "🦖" },
+            { nombre: "Rompecabezas 500p", precio: 95, icono: "🧩" },
+            { nombre: "Juego de Cartas Uno", precio: 60, icono: "🎴" },
+            { nombre: "Barco de Juguete", precio: 140, icono: "⛵" },
+            { nombre: "Pista de Carreras", precio: 450, icono: "🏎️" },
+            { nombre: "Avión de Fricción", precio: 125, icono: "✈️" },
+            { nombre: "Tren de Madera", precio: 210, icono: "🚂" },
+            { nombre: "Triciclo Infantil", precio: 420, icono: "🚲" },
+            { nombre: "Sonaja para Bebé", precio: 35, icono: "🔔" },       
+            { nombre: "Monopolio de Mesa", precio: 280, icono: "🎲" },
+            { nombre: "Memorama Educativo", precio: 55, icono: "🃏" },
+            { nombre: "Juego Twister", precio: 195, icono: "🎯" },
+            { nombre: "Cuerda de Salto", precio: 40, icono: "🪢" },
+            { nombre: "Cocinita de Juguete", precio: 390, icono: "🍳" },
+            { nombre: "Cometa de Viento", precio: 70, icono: "🪁" }
+        ];
+
+        let inventario = JSON.parse(localStorage.getItem('playnow_inventario')) || datosProductosOriginales.map((item, index) => ({
+            id: index,
+            nombre: item.nombre,
+            precioTienda: item.precio, 
+            stock: 12,
+            icono: item.icono
+        }));
+
+        let ordenesCompra = JSON.parse(localStorage.getItem('playnow_ordenes')) || [
+            { id: 1, cliente: "Juan Pérez", email: "juan.perez@ejemplo.com", producto: "Carro a Escala", cantidad: 2, total: "$204.00", direccion: "Av. Siempre Viva 742", estado: "Pendiente" },
+            { id: 2, cliente: "María López", email: "maria.lopez@ejemplo.com", producto: "Muñeca Clásica", cantidad: 1, total: "$180.00", direccion: "Calle 10 #45", estado: "Entregado" }
+        ];
+
+        let comentarios = JSON.parse(localStorage.getItem('playnow_comentarios')) || [
+            "💬 ¡Excelente tienda! Súper recomendados."
+        ];
+
+        function saveData() {
+            localStorage.setItem('playnow_inventario', JSON.stringify(inventario));
+            localStorage.setItem('playnow_ordenes', JSON.stringify(ordenesCompra));
+            localStorage.setItem('playnow_comentarios', JSON.stringify(comentarios));
+        }
+
+        window.addEventListener('storage', (e) => {
+            if (['playnow_inventario', 'playnow_ordenes', 'playnow_comentarios'].includes(e.key)) {
+                inventario = JSON.parse(localStorage.getItem('playnow_inventario')) || inventario;
+                ordenesCompra = JSON.parse(localStorage.getItem('playnow_ordenes')) || ordenesCompra;
+                comentarios = JSON.parse(localStorage.getItem('playnow_comentarios')) || comentarios;
+                
+                if (document.getElementById('view-client').classList.contains('active')) {
+                    initClientView();
+                }
+                if (document.getElementById('view-admin-panel').classList.contains('active')) {
+                    renderAdminData(false);
+                }
+            }
+        });
+
+        function navigateTo(viewId) {
+            document.querySelectorAll('.window').forEach(win => win.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            
+            if(viewId === 'view-client') {
+                initClientView();
+            }
+            if(viewId === 'view-admin-panel') {
+                renderAdminData(false); 
+            }
+        }
+
+        function openAdminSubView(subViewId) {
+            document.querySelectorAll('.admin-subview').forEach(sv => sv.style.display = 'none');
+            document.getElementById(subViewId).style.display = 'block';
+            renderAdminData(false); 
+        }
+
+        function renderComments() {
+            const container = document.getElementById('comments-display-container');
+            if (container) {
+                container.innerHTML = '';
+                comentarios.forEach(txt => {
+                    const div = document.createElement('div');
+                    div.className = 'comment-item';
+                    div.textContent = txt.startsWith('💬') ? txt : `💬 ${txt}`;
+                    container.appendChild(div);
+                });
+            }
+        }
+
+        function submitComment() {
+            const commentText = document.getElementById('client-comment-text').value.trim();
+            if(commentText === "") {
+                alert("Por favor escribe un comentario antes de publicar.");
+                return;
+            }
+            comentarios.unshift(commentText);
+            saveData();
+            renderComments();
+            document.getElementById('client-comment-text').value = ""; 
+            alert("¡Tu comentario ha sido publicado con éxito!");
+        }
+
+        function cancelComment() {
+            document.getElementById('client-comment-text').value = "";
+            alert("Comentario cancelado.");
+        }
+
+        function initClientView() {
+            const grid = document.getElementById('client-products-grid');
+            if (grid) grid.innerHTML = '';
+            
+            const select = document.getElementById('order-product');
+            if (select) select.innerHTML = '';
+
+            inventario.forEach(prod => {
+                if (grid) {
+                    const card = document.createElement('div');
+                    card.className = 'toy-card';
+                    card.innerHTML = `
+                        <div class="toy-img-container">${prod.icono}</div>
+                        <div class="toy-name" title="${prod.nombre}">${prod.nombre}</div>
+                        <div style="font-size:0.75rem; color:var(--success); font-weight:bold;">$${(prod.precioTienda * 1.2).toFixed(2)}</div>
+                        <div style="font-size:0.65rem; color:#7f8c8d;">Stock: ${prod.stock}</div>
+                    `;
+                    grid.appendChild(card);
+                }
+
+                if (select) {
+                    const option = document.createElement('option');
+                    option.value = prod.id;
+                    option.textContent = `${prod.nombre} ($${(prod.precioTienda * 1.2).toFixed(2)})`;
+                    select.appendChild(option);
+                }
+            });
+
+            const fechaEntrega = new Date();
+            fechaEntrega.setHours(fechaEntrega.getHours() + 24);
+            const dtField = document.getElementById('order-datetime');
+            if (dtField) dtField.value = fechaEntrega.toLocaleString();
+            
+            updateFinalPrice();
+            renderComments();
+        }
+
+        function updateFinalPrice() {
+            const prodSelect = document.getElementById('order-product');
+            if (!prodSelect || !prodSelect.value) return;
+            
+            const prodId = prodSelect.value;
+            const qtyField = document.getElementById('order-qty');
+            const qty = parseInt(qtyField ? qtyField.value : 1) || 1;
+            const producto = inventario.find(p => p.id == prodId);
+            
+            if(producto) {
+                const precioPublico = producto.precioTienda * 1.20;
+                const totalField = document.getElementById('order-total');
+                if (totalField) totalField.value = `$${(precioPublico * qty).toFixed(2)}`;
+            }
+        }
+
+        function toggleContactInfo() {
+            const details = document.getElementById('contact-details');
+            details.style.display = details.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function processOrder(isAccepted) {
+            if (!isAccepted) {
+                alert("Puedes editar la información en el formulario.");
+                return;
+            }
+
+            const name = document.getElementById('order-name').value.trim();
+            const address = document.getElementById('order-address').value.trim();
+            const email = document.getElementById('order-email').value.trim();
+            const prodId = document.getElementById('order-product').value;
+            const qty = parseInt(document.getElementById('order-qty').value);
+            const datetime = document.getElementById('order-datetime').value;
+
+            if(!name || !address || !email) {
+                alert("Por favor completa todos los campos del cliente.");
+                return;
+            }
+
+            const producto = inventario.find(p => p.id == prodId);
+            const totalStr = document.getElementById('order-total').value;
+
+            if (producto.stock < qty) {
+                alert(`Lo sentimos, solo quedan ${producto.stock} unidades de este producto.`);
+                return;
+            }
+            
+            producto.stock -= qty;
+            
+            ordenesCompra.push({
+                id: Date.now(), 
+                cliente: name,
+                email: email, 
+                producto: producto.nombre,
+                cantidad: qty,
+                total: totalStr,
+                direccion: address,
+                estado: "Pendiente"
+            });
+
+            saveData();
+            renderAdminData(true); 
+
+            const templateParams = {
+                client_name: name,
+                client_email: email,
+                product_name: producto.nombre,
+                quantity: qty,
+                total_price: totalStr,
+                delivery_address: address,
+                delivery_date: datetime
+            };
+
+            emailjs.send(EMAILJS_SERVICE_id, EMAILJS_TEMPLATE_CLIENTE, templateParams)
+                .then(function(response) {
+                    alert(`¡Orden Procesada Exitosamente!\nSe ha enviado el comprobante real al correo: ${email}.`);
+                }, function(error) {
+                    alert("La orden se guardó localmente, pero falló el envío del correo de confirmación.");
+                });
+
+            document.getElementById('order-form').reset();
+            initClientView();
+        }
+
+        function loginAdmin() {
+            const emailInput = document.getElementById('admin-user-email').value.trim();
+            const passInput = document.getElementById('admin-pass').value;
+
+            if(emailInput === "playnow2026@gmail.com" && passInput === "administrador1playnow") {
+                navigateTo('view-admin-panel');
+                document.getElementById('admin-user-email').value = "";
+                document.getElementById('admin-pass').value = "";
+            } else {
+                alert("Credenciales incorrectas. Verifique que el correo y la contraseña administrativa sean los correctos.");
+            }
+        }
+
+        function updateProductData(id) {
+            const nuevoPrecio = parseFloat(document.getElementById(`edit-price-${id}`).value);
+            const nuevoStock = parseInt(document.getElementById(`edit-stock-${id}`).value);
+
+            if(isNaN(nuevoPrecio) || isNaN(nuevoStock) || nuevoPrecio < 0 || nuevoStock < 0) {
+                alert("Por favor introduce valores numéricos válidos.");
+                return;
+            }
+
+            const prod = inventario.find(p => p.id === id);
+            if(prod) {
+                prod.precioTienda = nuevoPrecio;
+                prod.stock = nuevoStock;
+                alert(`Producto ${prod.nombre} actualizado correctamente.`);
+                saveData();
+                renderAdminData(true); 
+            }
+        }
+
+        function enviarCorreoAdminStockBajo(nombreProducto, stockActual) {
+            const adminEmail = "playnow2026@gmail.com"; 
+            
+            const adminParams = {
+                admin_email: adminEmail,
+                product_name: nombreProducto,
+                current_stock: stockActual
+            };
+
+            if(EMAILJS_TEMPLATE_ADMIN !== "TU_TEMPLATE_ADMIN") {
+                emailjs.send(EMAILJS_SERVICE_id, EMAILJS_TEMPLATE_ADMIN, adminParams)
+                    .then(function(response) {
+                        console.log(`Alerta enviada automáticamente al correo del administrador.`);
+                    }, function(error) {
+                        console.error('Error en EmailJS al enviar al Admin:', error);
+                    });
+            }
+        }
+
+        // Corrección aplicada: Se eliminó el bloque condicional de simulación
+        function marcarComoEntregado(orderId) {
+            const orden = ordenesCompra.find(o => o.id === orderId);
+            if (orden) {
+                orden.estado = "Entregado";
+                saveData();
+                renderAdminData(false); 
+
+                const entregaParams = {
+                    client_name: orden.cliente,
+                    client_email: orden.email || "correo@desconocido.com",
+                    product_name: orden.producto,
+                    quantity: orden.cantidad,
+                    total_price: orden.total,
+                    delivery_address: orden.direccion
+                };
+
+                emailjs.send(EMAILJS_SERVICE_id, EMAILJS_TEMPLATE_ENTREGA, entregaParams)
+                    .then(function(response) {
+                        alert(`La orden de "${orden.cliente}" ha sido cambiada a Entregado.\n¡Correo de finalización enviado a ${entregaParams.client_email}!`);
+                    }, function(error) {
+                        alert(`La orden se cambió a Entregado, pero ocurrió un error con EmailJS al enviar la notificación a ${entregaParams.client_email}.`);
+                        console.error("Detalles del error de entrega EmailJS:", error);
+                    });
+            }
+        }
+
+        function renderAdminData(triggerEmails = false) {
+            const invBody = document.getElementById('inventory-table-body');
+            if (invBody) invBody.innerHTML = '';
+            
+            const stockBody = document.getElementById('stock-table-body');
+            if (stockBody) stockBody.innerHTML = '';
+
+            const alertContainer = document.getElementById('stock-alerts-container');
+            if (alertContainer) alertContainer.innerHTML = '';
+
+            inventario.forEach(prod => {
+                const precioPublico = prod.precioTienda * 1.20;
+                
+                if (invBody) {
+                    const trInv = document.createElement('tr');
+                    trInv.innerHTML = `
+                        <td><span style="font-size:1.2rem;">${prod.icono}</span> <strong>${prod.nombre}</strong></td>
+                        <td><input type="number" id="edit-price-${prod.id}" value="${prod.precioTienda}" style="width:70px;"></td>
+                        <td>$${precioPublico.toFixed(2)}</td>
+                        <td>${prod.stock} uds</td>
+                        <td><input type="number" id="edit-stock-${prod.id}" value="${prod.stock}" style="width:60px;"></td>
+                        <td><button class="btn btn-success" style="padding:5px 10px; font-size:0.8rem;" onclick="updateProductData(${prod.id})">Guardar</button></td>
+                    `;
+                    invBody.appendChild(trInv);
+                }
+
+                if (stockBody) {
+                    const trStock = document.createElement('tr');
+                    trStock.innerHTML = `<td>${prod.icono} ${prod.nombre}</td><td>${prod.stock} unidades</td>`;
+                    stockBody.appendChild(trStock);
+                }
+
+                if(prod.stock < 10) {
+                    if (alertContainer) {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'stock-alert';
+                        alertDiv.textContent = `⚠️ NOTIFICACIÓN: El producto "${prod.nombre}" está en stock mínimo (${prod.stock} unidades).`;
+                        alertContainer.appendChild(alertDiv);
+                    }
+                    if (triggerEmails) {
+                        enviarCorreoAdminStockBajo(prod.nombre, prod.stock);
+                    }
+                }
+            });
+
+            const ordersBody = document.getElementById('orders-table-body');
+            if (ordersBody) {
+                ordersBody.innerHTML = '';
+                ordenesCompra.forEach(ord => {
+                    const isEntregado = ord.estado === 'Entregado';
+                    
+                    const trOrd = document.createElement('tr');
+                    trOrd.innerHTML = `
+                        <td>${ord.cliente}</td>
+                        <td>${ord.producto}</td>
+                        <td>${ord.cantidad}</td>
+                        <td>${ord.total}</td>
+                        <td>${ord.direccion}</td>
+                        <td style="color: ${isEntregado ? 'green' : 'orange'}; font-weight:bold;">${ord.estado}</td>
+                        <td>
+                            ${isEntregado 
+                                ? '<span>✅ Finalizado</span>' 
+                                : `<button class="btn btn-primary" style="padding:4px 8px; font-size:0.75rem;" onclick="marcarComoEntregado(${ord.id})">Entregado</button>`
+                            }
+                        </td>
+                    `;
+                    ordersBody.appendChild(trOrd);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
